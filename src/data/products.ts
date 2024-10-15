@@ -8,6 +8,7 @@ export type Product = {
     nutritionalInfo: NutritionalInfo;
     ingredients: string[];
     reviews: string[];
+    categories: string[];
 }
 
 export const products: Product[] = [
@@ -19,6 +20,7 @@ export const products: Product[] = [
         nutritionalInfo: { calories: 52, fat: 0.2, protein: 0.3 },
         ingredients: ['Apple'],
         reviews: ['Fresh and juicy!', 'Perfect for snacking.'],
+        categories: ['fruits'],
     },
     {
         id: 2,
@@ -28,6 +30,7 @@ export const products: Product[] = [
         nutritionalInfo: { calories: 96, fat: 0.3, protein: 1.3 },
         ingredients: ['Banana'],
         reviews: ['Great for smoothies!', 'Very tasty.'],
+        categories: ['fruits', 'vegetables'],
     },
     {
         id: 3, name: 'Orange',
@@ -36,6 +39,7 @@ export const products: Product[] = [
         nutritionalInfo: { calories: 96, fat: 0.3, protein: 1.3 },
         ingredients: ['Orange'],
         reviews: ['Great for juice!', 'Very tasty.'],
+        categories: ['fruits'],
     },
     {
         id: 4, name: 'Strawberry',
@@ -44,6 +48,7 @@ export const products: Product[] = [
         nutritionalInfo: { calories: 96, fat: 0.3, protein: 1.3 },
         ingredients: ['Strawberry'],
         reviews: ['Great for smoothies!', 'Very tasty.'],
+        categories: ['fruits'],
     },
     {
         id: 5, name: 'Watermelon',
@@ -52,5 +57,6 @@ export const products: Product[] = [
         nutritionalInfo: { calories: 96, fat: 0.3, protein: 1.3 },
         ingredients: ['Watermelon'],
         reviews: ['Great for juice!', 'Very tasty.'],
+        categories: ['fruits'],
     },
 ];
