@@ -1,0 +1,174 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+.bg {
+  background-color: var(--primary-background);
+}
+.fresh {
+  color: var(--freshtext-color);
+}
+.dynamo {
+  font-family: dynamo, serif;
+  line-height: 1;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: dynamo, serif;
+  line-height: 1;
+}
+.f {
+  display: flex;
+}
+.f-wrap {
+  flex-wrap: wrap;
+}
+.f-align-center {
+  align-items: center;
+}
+.f-align-between {
+  align-items: space-between;
+}
+.f-justify-between {
+  justify-content: space-between;
+}
+.f-justify-center {
+  justify-content: center;
+}
+.f-center {
+  justify-content: center;
+  align-items: center;
+}
+.pointer {
+  cursor: pointer;
+}
+.f-col {
+  flex-direction: column;
+}
+.gap {
+  gap: 8px;
+}
+.padding {
+  padding: 12px;
+}
+.no-padding {
+  padding: 0;
+}
+.padding-small {
+  padding: 6px 12px;
+}
+.icon {
+  line-height: 1;
+}
+.border {
+  border: 2px solid var(--border-color);
+}
+.rounded {
+  border-radius: 8px;
+}
+.bold {
+  font-weight: bold;
+}
+.large {
+  font-size: 32px;
+}
+.regular {
+  font-size: 24px;
+}
+.small {
+  font-size: 16px;
+}
+.center {
+  text-align: center;
+}
+.right {
+  text-align: right;
+}
+.no-margin {
+  margin: 0;
+}
+.highlight {
+  background-color: var(--highlight-color);
+}
+.highlight-hover:hover,
+.highlight-hover:hover + .badge {
+  background-color: var(--highlight-color);
+}
+.mx-w-240 {
+  max-width: 240px;
+}
+.w-160 {
+  width: 160px;
+}
+.w-80 {
+  width: 80px;
+}
+.mw-content {
+  max-width: max-content;
+}
+.expand {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+.expand::after {
+  content: "";
+  position: absolute;
+  bottom: -2px; /* Adjust the position as needed */
+  width: 0px;
+  height: 2px; /* Adjust the height as needed */
+  background-color: var(--border-color); /* Change the color as desired */
+  transition: width 0.3s ease-in-out;
+}
+@keyframes expand-border {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(2);
+  }
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes nudge {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(-7deg);
+  }
+
+  50% {
+    transform: rotate(7deg);
+  }
+
+  75% {
+    transform: rotate(-7deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .spin:hover {
+    animation: spin infinite 2s linear;
+    cursor: pointer;
+  }
+  .nudge:hover,
+  .nudge:hover .badge {
+    animation: nudge normal 1s ease-in-out;
+    cursor: pointer;
+  }
+  .expand:hover::after {
+    width: 100%;
+    align-items: center;
+  }
+}
