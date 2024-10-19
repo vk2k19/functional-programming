@@ -26,7 +26,7 @@ export const Select = forwardRef(
     ref: ForwardedRef<HTMLSelectElement>
   ) => (
     <label className="f f-wrap gap mw-content">
-      <span className="w-160 right">
+      <span>
         {label}:{required && <sup>*</sup>}
       </span>
       <select

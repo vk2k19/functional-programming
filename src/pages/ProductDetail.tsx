@@ -13,7 +13,10 @@ export const ProductDetails = () => {
   const addToCart = () => {
     if (!addItemDispatcher) return; // If the context provider is not available, do nothing
     if (!product) return; // If the product is not available, do nothing
-    addItemDispatcher(product);
+    addItemDispatcher({
+      ...product,
+      quantity: 1,
+    });
   };
 
   return (

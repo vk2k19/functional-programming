@@ -12,7 +12,7 @@ export const Checkout = () => {
   const navigate = useNavigate();
   // Calculate total price of items in the cart here and store it in the `totalPrice` variable.
   const totlaPrice = items
-    .reduce((sum, item) => sum + item.price, 0)
+    .reduce((sum, item) => sum + item.price * item.quantity, 0)
     .toFixed(2);
 
   const onSubmit = (e: any) => {

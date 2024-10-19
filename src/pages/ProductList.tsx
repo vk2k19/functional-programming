@@ -12,9 +12,11 @@ const ProductList = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [category, setCategory] = useState("");
   const [sort, setSort] = useState("");
+  const [search, setSearch] = useState("");
 
   // Create RxJS subjects
   const category$ = new Subject();
+  const search$ = new Subject();
   const sort$ = new Subject();
 
   useEffect(() => {
@@ -22,17 +24,23 @@ const ProductList = () => {
       const { products } = await import("../data/products");
       const filterAndSort$ = category$
         .pipe(
-          combineLatestWith(sort$),
-          map(([category, sort]) => {
-            console.log("cc 1 ", category, sort);
+          combineLatestWith(sort$, search$),
+          map(([category, sort, search]) => {
+            console.log("filter and sort", category, sort, search);
             // Filter products by category
             const filteredByCategory = R.ifElse(
               R.always(category),
-              R.filter((product: Product) =>
-                category ? R.includes(category, product.categories) : true
+              R.filter(
+                (product: Product) =>
+                  !category || R.includes(category, product.categories)
               ),
               R.identity
             )(products);
+
+            // search by name
+            const filteredByName = R.filter((product: Product) =>
+              R.includes(R.toLower(search), R.toLower(product.name))
+            )(filteredByCategory);
 
             // Sort products
             const sortedProducts = R.cond([
@@ -42,7 +50,7 @@ const ProductList = () => {
             ])(sort);
 
             // Return final filtered and sorted list
-            return sortedProducts(filteredByCategory);
+            return sortedProducts(filteredByName);
           })
         )
         .subscribe(setFilteredProducts);
@@ -50,6 +58,7 @@ const ProductList = () => {
       // Emit initial values
       category$.next(category);
       sort$.next(sort);
+      search$.next(search);
 
       // Clean up the subscription
       return () => {
@@ -57,7 +66,7 @@ const ProductList = () => {
       };
     };
     loadedProducts();
-  }, [category, sort]);
+  }, [category, sort, search]);
 
   // Handlers to update category and sort
   const handleCategoryChange = (e) => {
@@ -73,7 +82,7 @@ const ProductList = () => {
       <Header nonClickableLogo />
       <div className="padding">
         <h2>Our Products</h2>
-        <div className="padding f f-centre-align f-justify-center">
+        <div className="f gap padding-y">
           <Select
             label="Filter by Category"
             name="category"
@@ -95,6 +104,19 @@ const ProductList = () => {
             ]}
           />
         </div>
+        <br />
+        <label className="f gap">
+          <span>Search by Name:</span>
+          <input
+            type="search"
+            placeholder="Search by Name"
+            onChange={(e) => {
+              console.log("Search", e.target.value);
+              setSearch(e.target.value);
+            }}
+          />
+        </label>
+        <br />
         <table style={{ borderCollapse: "collapse" }}>
           <thead>
             <tr>

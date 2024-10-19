@@ -1,21 +1,26 @@
 import { useCart } from "../context/CartContext";
-import { Product } from "../data/products";
 import { Header } from "../components/Header";
 import { ProductTitle } from "../components/ProductTitle";
 import { Icon } from "../components/Icon";
 import { CustomLink } from "../components/CustomLink";
 import { useEmptyCartRedirection } from "../hooks/useEmptyCartRedirection";
+import { Input } from "../components/Input";
 
 export const Cart = () => {
-  const { items, removeItemDispatcher } = useCart();
+  const { items, removeItemDispatcher, quantityUpdateDispatcher } = useCart();
 
   const removeItem = (id: number) => {
     if (!removeItemDispatcher) return; // If the context provider is not available, do nothing
     removeItemDispatcher({ id }); // Remove the item from the cart using the provided dispatcher function
   };
 
+  const updateQuantity = (id: number, quantity = "1") => {
+    if (!quantityUpdateDispatcher) return; // If the context provider is not available, do nothing
+    quantityUpdateDispatcher({ id, quantity: parseInt(quantity, 10) }); // Remove the item from the cart using the provided dispatcher function
+  };
+
   const totalPrice = items
-    .reduce((acc, curr) => acc + curr.price, 0)
+    .reduce((acc, curr) => acc + curr.price * curr.quantity, 0)
     .toFixed(2);
 
   useEmptyCartRedirection();
@@ -38,14 +43,31 @@ export const Cart = () => {
         </div>
       ) : (
         <div className="f f-col gap padding">
-          {items.map((item: Product) => (
+          {items.map((item) => (
             <div key={item.id} className="gap f f-col">
               <h2 className="no-margin f gap">
                 <ProductTitle product={item} />
               </h2>
+              <div className="f gap bold">
+                <Input
+                  align="left"
+                  label="Quantity"
+                  name="quantity"
+                  type="number"
+                  min="1"
+                  max="10"
+                  defaultValue={item.quantity ?? 1}
+                  className="mw-content no-padding"
+                  onChange={(e) => {
+                    updateQuantity(item.id, e.target.value);
+                  }}
+                />
+              </div>
               <div className="f gap">
-                <span className="small bold">Quantity: 1</span>
-                <span className="small bold">Total Price: ${item.price}</span>
+                <span className="small bold">
+                  Total Price: $
+                  {parseFloat(`${item.price * item.quantity}`).toFixed(2)}
+                </span>
               </div>
               <button
                 onClick={() => removeItem(item.id)}

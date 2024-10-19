@@ -1,24 +1,20 @@
-import { ChangeEventHandler } from "react";
+import { DetailedHTMLProps, InputHTMLAttributes } from "react";
 
 export const Input = ({
   label,
-  required = undefined,
+  required,
   name,
+  align = "right",
   ...others
-}: {
+}: DetailedHTMLProps<
+  InputHTMLAttributes<HTMLInputElement>,
+  HTMLInputElement
+> & {
+  align?: "right" | "left";
   label: string;
-  required?: boolean;
-  type: "text" | "password" | "email" | "search";
-  name: string;
-  pattern?: string;
-  placeholder?: string;
-  maxLength?: number;
-  minLength?: number;
-  value?: string;
-  onChange?: ChangeEventHandler<HTMLInputElement>;
 }) => (
   <label className="f f-wrap gap mw-content">
-    <span className="w-80 right">
+    <span className={`${align === "left" ? "" : "w-80 right"}`}>
       {label}:{required && <sup>*</sup>}
     </span>
     <input className="w-160" required={required} name={name} {...others} />
