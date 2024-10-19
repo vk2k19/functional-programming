@@ -1,7 +1,7 @@
 import { Header } from "../components/Header";
 import { CustomLink } from "../components/CustomLink";
 import { isFresh } from "../utils/isFresh";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import * as R from "ramda";
 import { Select } from "../components/Select";
 import { Subject } from "rxjs";
@@ -9,15 +9,15 @@ import { map, combineLatestWith } from "rxjs/operators";
 import { Product } from "../data/products";
 
 const ProductList = () => {
-  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [category, setCategory] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState("");
 
   // Create RxJS subjects
-  const category$ = new Subject();
-  const search$ = new Subject();
-  const sort$ = new Subject();
+  const category$ = new Subject<string>();
+  const search$ = new Subject<string>();
+  const sort$ = new Subject<string>();
 
   useEffect(() => {
     const loadedProducts = async () => {
@@ -25,7 +25,7 @@ const ProductList = () => {
       const filterAndSort$ = category$
         .pipe(
           combineLatestWith(sort$, search$),
-          map(([category, sort, search]) => {
+          map(([category, sort, search]: string[]) => {
             console.log("filter and sort", category, sort, search);
             // Filter products by category
             const filteredByCategory = R.ifElse(
@@ -35,7 +35,7 @@ const ProductList = () => {
                   !category || R.includes(category, product.categories)
               ),
               R.identity
-            )(products);
+            )(products) as Product[];
 
             // search by name
             const filteredByName = R.filter((product: Product) =>
@@ -47,7 +47,7 @@ const ProductList = () => {
               [R.equals("name"), () => R.sortBy(R.prop("name"))],
               [R.equals("price"), () => R.sortBy(R.prop("price"))],
               [R.T, () => R.identity],
-            ])(sort);
+            ])(sort) as Function;
 
             // Return final filtered and sorted list
             return sortedProducts(filteredByName);
@@ -69,11 +69,11 @@ const ProductList = () => {
   }, [category, sort, search]);
 
   // Handlers to update category and sort
-  const handleCategoryChange = (e) => {
+  const handleCategoryChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setCategory(e.target.value);
   };
 
-  const handleSortChange = (e) => {
+  const handleSortChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setSort(e.target.value);
   };
 
