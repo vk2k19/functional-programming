@@ -1,57 +1,71 @@
-import { Product } from "../data/products"; // Import the mock data
 import { Header } from "../components/Header";
 import { CustomLink } from "../components/CustomLink";
 import { isFresh } from "../utils/isFresh";
-import { ChangeEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import * as R from "ramda";
-import { Chevron } from "../components/Chevron";
 import { Select } from "../components/Select";
+import { Subject } from "rxjs";
+import { map, combineLatestWith } from "rxjs/operators";
+import { Product } from "../data/products";
 
 const ProductList = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [filter, setFilter] = useState({ category: "", sort: "name_asc" });
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [category, setCategory] = useState("");
+  const [sort, setSort] = useState("");
+
+  // Create RxJS subjects
+  const category$ = new Subject();
+  const sort$ = new Subject();
 
   useEffect(() => {
     const loadedProducts = async () => {
-      const data = await import("../data/products");
-      setProducts(data.products);
-      setFilteredProducts(data.products);
+      const { products } = await import("../data/products");
+      const filterAndSort$ = category$
+        .pipe(
+          combineLatestWith(sort$),
+          map(([category, sort]) => {
+            console.log("cc 1 ", category, sort);
+            // Filter products by category
+            const filteredByCategory = R.ifElse(
+              R.always(category),
+              R.filter((product: Product) =>
+                category ? R.includes(category, product.categories) : true
+              ),
+              R.identity
+            )(products);
+
+            // Sort products
+            const sortedProducts = R.cond([
+              [R.equals("name"), () => R.sortBy(R.prop("name"))],
+              [R.equals("price"), () => R.sortBy(R.prop("price"))],
+              [R.T, () => R.identity],
+            ])(sort);
+
+            // Return final filtered and sorted list
+            return sortedProducts(filteredByCategory);
+          })
+        )
+        .subscribe(setFilteredProducts);
+
+      // Emit initial values
+      category$.next(category);
+      sort$.next(sort);
+
+      // Clean up the subscription
+      return () => {
+        filterAndSort$.unsubscribe();
+      };
     };
     loadedProducts();
-  }, []);
+  }, [category, sort]);
 
-  const applyFilterAndSort = R.pipe(
-    R.filter((product: Product) =>
-      filter.category ? product.categories.includes(filter.category) : true
-    ),
-    R.sortWith([
-      filter.sort === "price_aesc"
-        ? R.ascend(R.prop("price"))
-        : R.descend(R.prop("price")),
-      filter.sort === "name_aesc"
-        ? R.ascend(R.prop("name"))
-        : R.descend(R.prop("name")),
-    ])
-  );
-
-  useEffect(() => {
-    setFilteredProducts(applyFilterAndSort(products));
-  }, [filter, products]);
-
-  const handleFilterChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setFilter({
-      ...filter,
-      category: e.target.value,
-    });
+  // Handlers to update category and sort
+  const handleCategoryChange = (e) => {
+    setCategory(e.target.value);
   };
 
-  const handleSortChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    console.log("handleSortChange", e.target.value);
-    setFilter({
-      ...filter,
-      sort: e.target.value,
-    });
+  const handleSortChange = (e) => {
+    setSort(e.target.value);
   };
 
   return (
@@ -63,8 +77,7 @@ const ProductList = () => {
           <Select
             label="Filter by Category"
             name="category"
-            value={filter.category}
-            onChange={handleFilterChange}
+            onChange={handleCategoryChange}
             options={[
               { id: "A", value: "", label: "All" },
               { id: "F", value: "fruits", label: "Fruits" },
@@ -74,14 +87,11 @@ const ProductList = () => {
           <Select
             label="Sort by"
             name="sortBy"
-            value={filter.category}
             onChange={handleSortChange}
             options={[
               { id: "", value: "", label: "None" },
-              { id: "p-d", value: "price_desc", label: "Price: High to Low" },
-              { id: "p-a", value: "price_aesc", label: "Price: Low to High" },
-              { id: "n-d", value: "name_desc", label: "Name: Z-A" },
-              { id: "n-a", value: "name_aesc", label: "Name: A-Z" },
+              { id: "p-d", value: "price", label: "Price" },
+              { id: "n-d", value: "name", label: "Name" },
             ]}
           />
         </div>
@@ -91,48 +101,34 @@ const ProductList = () => {
               <th className="padding-small border">
                 <button
                   onClick={() => {
-                    handleSortChange({
-                      target: {
-                        value:
-                          filter.sort === "name_aesc"
-                            ? "name_desc"
-                            : "name_aesc",
-                      },
-                    } as ChangeEvent<HTMLSelectElement>);
+                    setSort("name");
                   }}
                   className="dynamo f gap"
                 >
                   Product Name{" "}
-                  {filter.sort.includes("name") && (
-                    <Chevron up={filter.sort === "name_aesc"} />
-                  )}
+                  {/* {sortFilter$.getValue().includes("name") && (
+                    <Chevron up={sortFilter$.getValue() === "name_aesc"} />
+                  )} */}
                 </button>
               </th>
               <th className="padding-small border">
                 <button
                   onClick={() => {
-                    handleSortChange({
-                      target: {
-                        value:
-                          filter.sort === "price_aesc"
-                            ? "price_desc"
-                            : "price_aesc",
-                      },
-                    } as ChangeEvent<HTMLSelectElement>);
+                    setSort("price");
                   }}
                   className="dynamo f gap"
                 >
                   Price{" "}
-                  {filter.sort.includes("price") && (
-                    <Chevron up={filter.sort === "name_aesc"} />
-                  )}
+                  {/* {sortFilter$.getValue().includes("price") && (
+                    <Chevron up={sortFilter$.getValue() === "name_aesc"} />
+                  )} */}
                 </button>
               </th>
               <th className="padding-small border dynamo">Fresh</th>
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.map((product) => (
+            {filteredProducts?.map((product) => (
               <tr key={product.id}>
                 <td className="border padding">
                   <CustomLink to={`/products/${product.id}`}>
